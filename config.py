@@ -1,9 +1,9 @@
-\
-from pathlib import Path
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from dataclasses import dataclass
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,12 +12,17 @@ load_dotenv()
 @dataclass(frozen=True)
 class Settings:
     bot_token: str = os.getenv("BOT_TOKEN", "").strip()
-    graphql_endpoint: str = os.getenv("GRAPHQL_ENDPOINT", "https://mainnet.ackinacki.org/graphql").strip()
-    acki_live_endpoint: str = os.getenv("ACKI_LIVE_ENDPOINT", "https://acki.live").strip()
+    graphql_endpoint: str = os.getenv(
+        "GRAPHQL_ENDPOINT",
+        "https://mainnet.ackinacki.org/graphql",
+    ).strip()
+    acki_live_endpoint: str = os.getenv(
+        "ACKI_LIVE_ENDPOINT",
+        "https://acki.live",
+    ).strip()
     aliases_path: Path = Path(os.getenv("ALIASES_PATH", "aliases.json"))
 
-    # Best-effort labels for balances. These can be adjusted after you confirm the on-chain ids.
-    currency_labels: dict[int, str] = None  # type: ignore[assignment]
+    currency_labels: dict[int, str] = None  # type: ignore
 
     def __post_init__(self):
         if self.currency_labels is None:
