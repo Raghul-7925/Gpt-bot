@@ -1,45 +1,54 @@
-\
-from __future__ import annotations
-
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from wallet import WalletService
-
+from services.wallet import WalletService
 
 router = Router()
 
 
-def _format_report(report) -> str:
-    return (
-        "📊 Wallet Info\n\n"
-        f"👤 {report.display_name}\n"
-        f"🪙 NACKL: {report.nackl}\n"
-        f"🔒 Locked: {report.locked}\n"
-        f"💵 USDC: {report.usdc}\n"
-        f"🐚 SHELL: {report.shell}\n"
-        f"⚡ Speed: {report.speed} NACKL/24h\n"
-        f"👆 Total taps: {report.total_taps}\n"
-        f"🎮 MBI Level: {report.mbi_level}\n\n"
-        f"📍 {report.wallet_address}"
-    )
-
-
 @router.message(Command("wallet"))
-async def wallet_handler(message: Message) -> None:
-    args = message.text.split(maxsplit=1)
-    if len(args) < 2 or not args[1].strip():
-        await message.answer("Usage: /wallet <wallet address>")
+async def wallet(message: Message):
+
+    parts = message.text.split(maxsplit=1)
+
+    if len(parts) != 2:
+        await message.answer(
+            "Usage:\n<code>/wallet 0:address</code>"
+        )
         return
 
-    query = args[1].strip()
-    service: WalletService = message.bot["wallet_service"]
+    address = parts[1].strip()
+
+    wallet_service: WalletService = message.bot["wallet"]
 
     try:
-        report = await service.get_wallet_report(query)
+        data = await wallet_service.get_wallet(address)
+
     except Exception as e:
-        await message.answer(f"❌ Could not fetch wallet '{query}': {e}")
+        await message.answer(
+            f"❌ Error\n\n<code>{e}</code>"
+        )
         return
 
-    await message.answer(_format_report(report))
+    text = f"""
+📊 <b>Wallet Info</b>
+
+📍 <code>{data['address']}</code>
+
+🪙 NACKL: <b>{data['nackl']}</b>
+
+🔒 Locked: <b>{data['locked']}</b>
+
+💵 USDC: <b>{data['usdc']}</b>
+
+🐚 SHELL: <b>{data['shell']}</b>
+
+⚡ Speed: <b>{data['speed'] or 'Unknown'}</b>
+
+👆 Total taps: <b>{data['taps'] or 'Unknown'}</b>
+
+🎮 MBI Level: <b>{data['mbi'] or 'Unknown'}</b>
+"""
+
+    await message.answer(text)
