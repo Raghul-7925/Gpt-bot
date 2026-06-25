@@ -52,21 +52,4 @@ async def wallet(message: Message):
 🎮 MBI Level: <b>{data['mbi'] or 'Unknown'}</b>
 """
 
-    await message.answer(text)📍 <code>{data['address']}</code>
-
-🪙 NACKL: <b>{data['nackl']}</b>
-
-🔒 Locked: <b>{data['locked']}</b>
-
-💵 USDC: <b>{data['usdc']}</b>
-
-🐚 SHELL: <b>{data['shell']}</b>
-
-⚡ Speed: <b>{data['speed'] or 'Unknown'}</b>
-
-👆 Total taps: <b>{data['taps'] or 'Unknown'}</b>
-
-🎮 MBI Level: <b>{data['mbi'] or 'Unknown'}</b>
-"""
-
     await message.answer(text)
