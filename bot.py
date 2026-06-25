@@ -63,6 +63,7 @@ async def main():
     gql = GraphQLClient(settings.graphql_endpoint)
     wallet = WalletService(gql)
 
+    # Store WalletService in Dispatcher
     dp["wallet"] = wallet
 
     dp.include_router(start_router)
