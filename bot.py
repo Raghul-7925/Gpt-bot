@@ -1,28 +1,35 @@
 from __future__ import annotations
 
-import os
-import logging
 import asyncio
+import logging
+import os
 
 from aiohttp import web
-
 from aiogram import Bot, Dispatcher
-from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from config import settings
-from graphql import GraphQLClient
 from handlers.start import router as start_router
 from handlers.wallet import router as wallet_router
-from wallet import WalletService
-from health import create_app
+from services.graphql import GraphQLClient
+from services.wallet import WalletService
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 
-logging.basicConfig(level=logging.INFO)
+async def health(request):
+    return web.Response(text="OK")
 
 
 async def start_health_server():
-    app = create_app()
+    app = web.Application()
+    app.router.add_get("/", health)
 
     runner = web.AppRunner(app)
     await runner.setup()
@@ -34,43 +41,38 @@ async def start_health_server():
     )
 
     await site.start()
-    logging.info("Health server started.")
+    logger.info("Health server started")
 
 
-async def main() -> None:
+async def main():
+
     if not settings.bot_token:
-        raise RuntimeError(
-            "BOT_TOKEN is missing. Set it in Render Environment Variables."
-        )
+        raise RuntimeError("BOT_TOKEN not found")
 
-    # Start HTTP server (needed for Render Web Service)
     await start_health_server()
 
-    # Telegram Bot
     bot = Bot(
         token=settings.bot_token,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+        default=DefaultBotProperties(
+            parse_mode=ParseMode.HTML
+        ),
     )
 
     dp = Dispatcher()
 
-    # GraphQL
     gql = GraphQLClient(settings.graphql_endpoint)
-    wallet_service = WalletService(gql)
+    wallet = WalletService(gql)
 
-    bot["wallet_service"] = wallet_service
+    dp["wallet"] = wallet
 
-    # Routers
     dp.include_router(start_router)
     dp.include_router(wallet_router)
 
-    logging.info("Bot started successfully.")
+    logger.info("Bot started")
 
     try:
         await dp.start_polling(bot)
     finally:
-        logging.info("Stopping bot...")
-
         await gql.close()
         await bot.session.close()
 
