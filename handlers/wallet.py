@@ -20,7 +20,8 @@ async def wallet(message: Message):
 
     address = parts[1].strip()
 
-    wallet_service: WalletService = message.bot["wallet"]
+    # Get WalletService from Dispatcher
+    wallet_service: WalletService = message.dispatcher["wallet"]
 
     try:
         data = await wallet_service.get_wallet(address)
@@ -35,6 +36,23 @@ async def wallet(message: Message):
 📊 <b>Wallet Info</b>
 
 📍 <code>{data['address']}</code>
+
+🪙 NACKL: <b>{data['nackl']}</b>
+
+🔒 Locked: <b>{data['locked']}</b>
+
+💵 USDC: <b>{data['usdc']}</b>
+
+🐚 SHELL: <b>{data['shell']}</b>
+
+⚡ Speed: <b>{data['speed'] or 'Unknown'}</b>
+
+👆 Total taps: <b>{data['taps'] or 'Unknown'}</b>
+
+🎮 MBI Level: <b>{data['mbi'] or 'Unknown'}</b>
+"""
+
+    await message.answer(text)📍 <code>{data['address']}</code>
 
 🪙 NACKL: <b>{data['nackl']}</b>
 
