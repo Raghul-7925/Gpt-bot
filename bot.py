@@ -72,7 +72,10 @@ async def main():
     logger.info("Bot started")
 
     try:
-        await dp.start_polling(bot)
+        await dp.start_polling(
+    bot,
+    wallet=wallet,
+        )
     finally:
         await gql.close()
         await bot.session.close()
